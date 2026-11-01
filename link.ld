@@ -13,6 +13,7 @@ SECTIONS
     {
         *(.vector_table)
         *(.text)
+        *(.rodata)
     } > FLASH
 
     .data :
