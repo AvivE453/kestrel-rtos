@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  ARM_TOOLCHAIN: arm-gnu-toolchain-15.3.rel2-x86_64-arm-none-eabi
+  ARM_TOOLCHAIN_URL: https://gitlab.arm.com/api/v4/projects/tooling%2Fgnu-toolchains-for-arm/packages/generic/gnu-toolchain/15.3.rel2/arm-gnu-toolchain-15.3.rel2-x86_64-arm-none-eabi.tar.xz
+  ARM_TOOLCHAIN_SHA256: 463df9665c246fa13bab2102115bbf83440661b6eb70b44f3dfd4712ca30037a
+  QEMU: xpack-qemu-arm-9.2.4-1
+  QEMU_URL: https://github.com/xpack-dev-tools/qemu-arm-xpack/releases/download/v9.2.4-1/xpack-qemu-arm-9.2.4-1-linux-x64.tar.gz
+  QEMU_SHA256: 203dc2c71e25fcf97b95181328e9b888cc8092ff404bffd4d267b9defabcb698
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          mkdir -p ~/opt && cd ~/opt
+          curl -sSL -o toolchain.tar.xz "$ARM_TOOLCHAIN_URL"
+          echo "$ARM_TOOLCHAIN_SHA256  toolchain.tar.xz" | sha256sum -c
+          tar -xf toolchain.tar.xz
+          curl -sSL -o qemu.tar.gz "$QEMU_URL"
+          echo "$QEMU_SHA256  qemu.tar.gz" | sha256sum -c
+          tar -xf qemu.tar.gz
+          echo "$HOME/opt/$ARM_TOOLCHAIN/bin" >> "$GITHUB_PATH"
+          echo "$HOME/opt/$QEMU/bin" >> "$GITHUB_PATH"
+
+      - name: Build
+        run: make
+
+      - name: Boot in QEMU and check UART output
+        run: make check
