@@ -3,13 +3,14 @@ CFLAGS = -mcpu=cortex-m3 -mthumb -std=c11 -Wall -Wextra -g -O0 -ffreestanding
 LDFLAGS = -nostdlib -T link.ld
 
 BUILD = build
+OBJS = $(BUILD)/startup.o $(BUILD)/main.o
 
-$(BUILD)/kernel.elf: $(BUILD)/startup.o link.ld
-	$(CC) $(CFLAGS) $(LDFLAGS) $(BUILD)/startup.o -o $(BUILD)/kernel.elf
+$(BUILD)/kernel.elf: $(OBJS) link.ld
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
 
-$(BUILD)/startup.o: startup.c
+$(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
-	$(CC) $(CFLAGS) -c startup.c -o $(BUILD)/startup.o
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: debug clean
 debug: $(BUILD)/kernel.elf

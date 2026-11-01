@@ -14,4 +14,25 @@ SECTIONS
         *(.vector_table)
         *(.text)
     } > FLASH
+
+    .data :
+    {
+        . = ALIGN(4);
+        _sdata = .;
+        *(.data)
+        . = ALIGN(4);
+        _edata = .;
+    } > RAM AT > FLASH
+
+    _sidata = LOADADDR(.data);
+
+    .bss :
+    {
+        . = ALIGN(4);
+        _sbss = .;
+        *(.bss)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = .;
+    } > RAM
 }
